@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Money";
+    Student Current = ViewBag.Student;
+}
+<script>
+    function changeState(event) {
+      const el = event.target;
+      const elToHide = el.nextElementSibling;
+
+      if(elToHide.style.display === 'none'){
+      elToHide.style.display = "inline";
+      }
+      else{
+          
+       elToHide.style.display = "none";
+      }
+}
+let studentName = '@ViewBag.StudentName';
+	function Route(studentName){
+		location.href =  window.location.protocol+ '//' + window.location.host + "/"+ studentName;
+	}
+</script>
+<input id="search" type="text" onchange="studentName = document.getElementById('search').value" />
+<button onclick="Route(studentName)">Search for student</button>
+
+<h1>Student: @Current.Name</h1>
+
+@foreach (int type in Enum.GetValues(typeof(TypeOfPayment)))
+{
+    <h2 style="cursor:pointer; background-color:orange" onclick="changeState(event)">@((TypeOfPayment)type)</h2>
+    <div class="Payments" style="display: none">
+    <h4>Predpis</h4>
+
+    <table class="customTable">
+        <thead>
+            <tr>
+                <th>Cost</th>
+                <th>Title</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var predpis in Current.GetBills((TypeOfPayment)type))
+            {
+                <tr>
+                    <td>@predpis.Cost</td>
+                    <td>@predpis.Title</td>
+                    <td>@predpis.Date.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h4>Platby</h4>
+    <table class="customTable">
+        <thead>
+            <tr>
+                <th>Cost</th>
+                <th>Title</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var predpis in Current.GetTranscations((TypeOfPayment)type))
+            {
+                <tr>
+                    <td>@predpis.Cost</td>
+                    <td>@predpis.Title</td>
+                    <td>@predpis.Date.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Current.Total((TypeOfPayment)type) == 0)
+    {
+        <p>All paid.</p>
+    }
+    else if (Current.Total((TypeOfPayment)type) < 0)
+    {
+        <p>Overpaid: @((Current.Total((TypeOfPayment)type)*-1))</p>
+    }
+    else
+    {
+        <p>Need to pay: @(Current.Total((TypeOfPayment)type))</p>
+    }
+</div>
+<br></br>
+}
